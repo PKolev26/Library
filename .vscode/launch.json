@@ -28,8 +28,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "e:/FMI/Library",
-      "program": "e:/FMI/Library/build/Debug/outDebug",
+      "cwd": "e:/FMI/Library/Library",
+      "program": "e:/FMI/Library/Library/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
