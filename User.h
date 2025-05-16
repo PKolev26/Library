@@ -16,7 +16,7 @@ class User {
     public:
 
     User() = default;
-
+    
     User(std::string _username, std::string _password, bool _isAdmin) : username(_username), password(_password), isAdmin(_isAdmin) {}
 
     std::string getUsername() const { return username; }
