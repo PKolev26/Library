@@ -27,6 +27,8 @@ int main() {
             commands.saveAs(filename);
         } else if (command == "login") {
             commands.login();
+        } else if (command == "logout") {
+            commands.logout();
         } else {
             std::cout << "Unknown command: " << command << std::endl;
         }

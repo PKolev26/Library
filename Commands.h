@@ -211,4 +211,15 @@ public:
         std::cout << "Invalid username or password." << std::endl;
     }
 
+    // Logout command
+    void logout() {
+        
+        if (!isLoggedIn) {
+            std::cout << "You are not logged in." << std::endl;
+            return;
+        }
+
+        isLoggedIn = false;
+        std::cout << "Successfully logged out." << std::endl;
+    }
 };
