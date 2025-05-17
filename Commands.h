@@ -8,6 +8,7 @@
 class Commands {
 
 private:
+
     std::string currentFilename;
     std::vector<Book> books;
     bool fileIsOpen = false;
@@ -164,6 +165,7 @@ public:
 
     // Help command
     void help() {
+
         std::cout << "The following commands are supported:" << std::endl;
         std::cout << "open <file>\topens <file>" << std::endl;
         std::cout << "close\t\tcloses currently opened file" << std::endl;
@@ -181,6 +183,7 @@ public:
 
     // Login command
     void login() {
+
         if (isLoggedIn) {
             std::cout << "You are already logged in." << std::endl;
             return;
@@ -213,7 +216,7 @@ public:
 
     // Logout command
     void logout() {
-        
+
         if (!isLoggedIn) {
             std::cout << "You are not logged in." << std::endl;
             return;
@@ -221,5 +224,44 @@ public:
 
         isLoggedIn = false;
         std::cout << "Successfully logged out." << std::endl;
+    }
+
+    // Books all command
+    void booksAll() {
+
+        if (!fileIsOpen) {
+            std::cout << "No file is currently open." << std::endl;
+            return;
+        }
+
+        if(!isLoggedIn){
+            std::cout << "You need to be logged in to execute this command!" << std::endl;
+            return;
+        }
+
+        for (const auto& book : books) {
+            book.print();
+        }
+    }
+
+    // Books info command
+    void booksInfo(const std::string& isbn) {
+
+        if (!fileIsOpen) {
+            std::cout << "No file is currently open." << std::endl;
+            return;
+        }
+
+        if(!isLoggedIn){
+            std::cout << "You need to be logged in to execute this command!" << std::endl;
+            return;
+        }
+        
+        for (const auto& book : books) {
+            if (book.getIsbn() == isbn)
+            {
+                book.printByIsbn();
+            }
+        }
     }
 };

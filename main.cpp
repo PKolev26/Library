@@ -29,6 +29,10 @@ int main() {
             commands.login();
         } else if (command == "logout") {
             commands.logout();
+        } else if (command == "books all") {
+            commands.booksAll();
+        } else if (command.size() >= 11 && command.substr(0, 11) == "books info " ) {
+            commands.booksInfo(command.substr(11));
         } else {
             std::cout << "Unknown command: " << command << std::endl;
         }

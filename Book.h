@@ -43,4 +43,22 @@ class Book {
     void setKeywords(const std::vector<std::string>& _keywords) { keywords = _keywords; }
     void setRating(double _rating) { rating = _rating; }
     void setIsbn(const std::string& _isbn) { isbn = _isbn; }
+
+    void print() const {
+        std::cout << author << "; " << title << "; " << genre << "; "<< description << "; " << isbn << std::endl;
+    }
+
+    void printByIsbn() const {
+        
+        std::cout << author << "; "
+                << title << "; "
+                << genre << "; "
+                << description << "; "
+                << year << "; ";
+        for (size_t i = 0; i < keywords.size(); ++i) {
+            std::cout << keywords[i];
+            if (i != keywords.size() - 1) std::cout << ", ";
+        }
+        std::cout << "; " << rating << "; " << isbn << std::endl;
+    }
 };
