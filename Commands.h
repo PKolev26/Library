@@ -12,6 +12,9 @@ private:
     std::vector<Book> books;
     bool fileIsOpen = false;
 
+    User currentUser;
+    bool isLoggedIn = false;
+
 public:
 
     // Open command
@@ -178,13 +181,19 @@ public:
 
     // Login command
     void login() {
+        if (isLoggedIn) {
+            std::cout << "You are already logged in." << std::endl;
+            return;
+        }
+
         std::string username;
         std::string password;
 
         std::cout << "Enter username: ";
-        std::cin >> username;
+        std::getline(std::cin, username);
+
         std::cout << "Enter password: ";
-        std::cin >> password;
+        std::getline(std::cin, password);
 
         std::vector<User> users;
         User userObj;
@@ -192,10 +201,14 @@ public:
 
         for (const auto& u : users) {
             if (u.getUsername() == username && u.getPassword() == password) {
+                currentUser = u;
+                isLoggedIn = true;
                 std::cout << "Welcome, " << username << "!" << std::endl;
                 return;
             }
         }
+        
         std::cout << "Invalid username or password." << std::endl;
     }
+
 };
