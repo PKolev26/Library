@@ -33,6 +33,14 @@ int main() {
             commands.booksAll();
         } else if (command.size() >= 11 && command.substr(0, 11) == "books info " ) {
             commands.booksInfo(command.substr(11));
+        } else if (command.size() >= 10 && command.substr(0, 10) == "users add ") {
+            std::string args = command.substr(10);
+            std::string username = args.substr(0, args.find(' '));
+            std::string password = args.substr(args.find(' ') + 1);
+            commands.userAdd(username, password);
+        } else if (command.size() >= 13 && command.substr(0, 13) == "users remove ") {
+            std::string username = command.substr(13);
+            commands.userRemove(username);
         } else {
             std::cout << "Unknown command: " << command << std::endl;
         }

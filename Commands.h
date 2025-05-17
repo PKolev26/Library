@@ -200,7 +200,7 @@ public:
 
         std::vector<User> users;
         User userObj;
-        userObj.readFromFile("users.txt", users);
+        userObj.readFromFile(USER_FILE, users);
 
         for (const auto& u : users) {
             if (u.getUsername() == username && u.getPassword() == password) {
@@ -263,5 +263,40 @@ public:
                 book.printByIsbn();
             }
         }
+    }
+
+    // User add command
+    void userAdd(std::string username, std::string password) {
+
+        if(!isLoggedIn){
+            std::cout << "You need to be logged in to execute this command!" << std::endl;
+            return;
+        }
+
+        if (!currentUser.getIsAdmin()) {
+            std::cout << "You do not have permission to add users." << std::endl;
+            return;
+        }
+
+        User newUser(username, password, false);
+        newUser.addUserToFile(newUser);
+        std::cout << "User " << username << " added successfully." << std::endl;
+    }
+
+    // User remove command
+    void userRemove(std::string username) {
+
+        if(!isLoggedIn){
+            std::cout << "You need to be logged in to execute this command!" << std::endl;
+            return;
+        }
+
+        if (!currentUser.getIsAdmin()) {
+            std::cout << "You do not have permission to remove users." << std::endl;
+            return;
+        }
+
+        currentUser.removeUserFromFile(username);
+        std::cout << "User " << username << " removed successfully." << std::endl;
     }
 };

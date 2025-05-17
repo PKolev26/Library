@@ -6,6 +6,9 @@
 #include <sstream>
 #include <vector>
 
+
+const std::string USER_FILE = "users.txt";
+
 class User {
 
     private:
@@ -45,5 +48,21 @@ class User {
             }
         }
         file.close();
+    }
+
+    void addUserToFile(const User& user) {
+        std::ofstream file(USER_FILE, std::ios::app);
+        if (!file.is_open()) {
+            std::cerr << "Error opening file: " << USER_FILE << std::endl;
+            return;
+        }
+        file << user.getUsername() << ";"
+             << user.getPassword() << ";"
+             << (user.getIsAdmin() ? "true" : "false") << "\n";
+        file.close();
+    }
+
+    void removeUserFromFile(const std::string& username) {
+        
     }
 };
