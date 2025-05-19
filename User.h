@@ -56,9 +56,9 @@ class User {
             std::cerr << "Error opening file: " << USER_FILE << std::endl;
             return;
         }
-        file << user.getUsername() << ";"
+        file << "\n" << user.getUsername() << ";"
              << user.getPassword() << ";"
-             << (user.getIsAdmin() ? "true" : "false") << "\n";
+             << (user.getIsAdmin() ? "true" : "false");
         file.close();
     }
 
