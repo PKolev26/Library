@@ -56,13 +56,46 @@ class User {
             std::cerr << "Error opening file: " << USER_FILE << std::endl;
             return;
         }
-        file << "\n" << user.getUsername() << ";"
+        if (file.tellp() != 0) file << "\n";
+        file << user.getUsername() << ";"
              << user.getPassword() << ";"
              << (user.getIsAdmin() ? "true" : "false");
         file.close();
     }
 
     void removeUserFromFile(const std::string& username) {
-        
+        std::ifstream file(USER_FILE);
+        if (!file.is_open()) {
+            std::cerr << "Error opening file: " << USER_FILE << std::endl;
+            return;
+        }
+        std::vector<User> users;
+        std::string line;
+        while (std::getline(file, line)) {
+            std::istringstream iss(line);
+            std::string user, password, isAdminStr;
+            if (std::getline(iss, user, ';') &&
+                std::getline(iss, password, ';') &&
+                std::getline(iss, isAdminStr)) {
+                bool isAdmin = (isAdminStr == "true" || isAdminStr == "1");
+                if (user != username) {
+                    users.emplace_back(user, password, isAdmin);
+                }
+            }
+        }
+        file.close();
+
+        std::ofstream outFile(USER_FILE);
+        if (!outFile.is_open()) {
+            std::cerr << "Error opening file: " << USER_FILE << std::endl;
+            return;
+        }
+        for (size_t i = 0; i < users.size(); ++i) {
+            if (i != 0) outFile << "\n";
+            outFile << users[i].getUsername() << ";"
+                    << users[i].getPassword() << ";"
+                    << (users[i].getIsAdmin() ? "true" : "false");
+        }
+        outFile.close();
     }
 };

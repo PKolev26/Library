@@ -1,47 +1,61 @@
 #include "Book.h"
 #include "User.h"
 #include "Commands.h"
+#include <iostream>
+#include <sstream>
 
 int main() {
-
     Commands commands;
-
     std::string command;
+
     while (true) {
         std::cout << "> ";
         std::getline(std::cin, command);
 
         if (command == "exit") {
             commands.exit();
-        } else if (command == "help") {
+        }
+        else if (command == "help") {
             commands.help();
-        } else if (command.size() >= 5 && command.substr(0, 5) == "open ") {
+        }
+        else if (command.size() >= 5 && command.substr(0, 5) == "open ") {
             std::string filename = command.substr(5);
             commands.open(filename);
-        } else if (command == "close") {
+        }
+        else if (command == "close") {
             commands.close();
-        } else if (command == "save") {
+        }
+        else if (command == "save") {
             commands.save();
-        } else if (command.size() >= 7 && command.substr(0, 7) == "saveas ") {
+        }
+        else if (command.size() >= 7 && command.substr(0, 7) == "saveas ") {
             std::string filename = command.substr(7);
             commands.saveAs(filename);
-        } else if (command == "login") {
+        }
+        else if (command == "login") {
             commands.login();
-        } else if (command == "logout") {
+        }
+        else if (command == "logout") {
             commands.logout();
-        } else if (command == "books all") {
+        }
+        else if (command == "books all") {
             commands.booksAll();
-        } else if (command.size() >= 11 && command.substr(0, 11) == "books info " ) {
-            commands.booksInfo(command.substr(11));
-        } else if (command.size() >= 10 && command.substr(0, 10) == "users add ") {
+        }
+        else if (command.size() >= 11 && command.substr(0, 11) == "books info ") {
+            std::string isbn = command.substr(11);
+            commands.booksInfo(isbn);
+        }
+        else if (command.size() >= 10 && command.substr(0, 10) == "users add ") {
             std::string args = command.substr(10);
             std::string username = args.substr(0, args.find(' '));
             std::string password = args.substr(args.find(' ') + 1);
             commands.userAdd(username, password);
-        } else if (command.size() >= 13 && command.substr(0, 13) == "users remove ") {
+        }
+        else if (command.size() >= 13 && command.substr(0, 13) == "users remove ") {
             std::string username = command.substr(13);
             commands.userRemove(username);
-        } else {
+        }
+        else {
             std::cout << "Unknown command: " << command << std::endl;
         }
     }
