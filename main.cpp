@@ -55,6 +55,12 @@ int main() {
             std::string username = command.substr(13);
             commands.userRemove(username);
         }
+        else if (command.size() >= 11 && command.substr(0, 11) == "books find ") {
+            std::string args = command.substr(11);
+            std::string option = args.substr(0, args.find(' '));
+            std::string optionString = args.substr(args.find(' ') + 1);
+            commands.booksFind(option, optionString);
+        }
         else {
             std::cout << "Unknown command: " << command << std::endl;
         }

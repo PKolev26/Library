@@ -265,6 +265,24 @@ public:
         }
     }
 
+    // Books find command
+    void booksFind(const std::string& option, const std::string& optionString) {
+
+        if (!fileIsOpen) {
+            std::cout << "No file is currently open." << std::endl;
+            return;
+        }
+
+        if(!isLoggedIn){
+            std::cout << "You need to be logged in to execute this command!" << std::endl;
+            return;
+        }
+
+        for (const auto& book : books) {
+            book.booksFind(option, optionString);
+        }
+    }
+
     // User add command
     void userAdd(std::string username, std::string password) {
 

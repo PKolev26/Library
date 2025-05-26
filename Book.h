@@ -61,4 +61,21 @@ class Book {
         }
         std::cout << "; " << rating << "; " << isbn << std::endl;
     }
+
+    void booksFind(const std::string& option, const std::string& optionString) const {
+        if (option == "title" && title.find(optionString) != std::string::npos) {
+            print();
+        } else if (option == "author" && author.find(optionString) != std::string::npos) {
+            print();
+        } else if (option == "tag") {
+            for (const auto& keyword : keywords) {
+                if (keyword.find(optionString) != std::string::npos) {
+                    print();
+                    break;
+                }
+            }
+        }
+    }
+
+
 };
