@@ -132,6 +132,15 @@ public:
             std::cout << "No file is currently open." << std::endl;
             return;
         }
+        if (context.hasChanges) {
+            std::string choice;
+            std::cout << "You have unsaved changes. Are you sure you want to close file " << "? (yes/no): ";
+            std::getline(std::cin, choice);
+            if (choice != "yes") {
+                std::cout << "Close canceled.\n";
+                return;
+            }
+        }
         context.books.clear();
         std::cout << "Successfully closed " << context.currentFilename << std::endl;
         context.currentFilename.clear();
@@ -180,8 +189,10 @@ public:
             return;
         }
         std::string username, password;
-        std::cout << "Enter username: "; std::getline(std::cin, username);
-        std::cout << "Enter password: "; std::getline(std::cin, password);
+        std::cout << "Enter username: "; 
+        std::getline(std::cin, username);
+        std::cout << "Enter password: ";
+        std::getline(std::cin, password);
 
         std::vector<User> users;
         User temp;
