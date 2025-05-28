@@ -78,26 +78,47 @@ public:
             return;
         }
 
-        if (context.newBooks.empty()) {
-            std::cout << "No new books to save. Skipping write." << std::endl;
+        if (!context.isSorted && context.newBooks.empty() && context.postSortNewBooks.empty()) {
+            std::cout << "No changes to save." << std::endl;
             return;
         }
 
-        std::ofstream file(context.currentFilename, std::ios::app);
+        std::ofstream file(context.currentFilename, std::ios::trunc);
         if (!file.is_open()) {
             std::cerr << "Failed to open file: " << context.currentFilename << std::endl;
             return;
         }
 
-        for (const auto& book : context.newBooks) {
-            book.addBookToFile(context.currentFilename);
+        if (context.isSorted) {
+            for (const auto& book : context.books)
+                book.addBookToFile(context.currentFilename);
+        } else {
+            context.books.insert(context.books.end(), context.newBooks.begin(), context.newBooks.end());
+            for (const auto& book : context.books)
+                book.addBookToFile(context.currentFilename);
         }
 
-        file.close();
+        if (!context.postSortNewBooks.empty()) {
+            std::ofstream appendFile(context.currentFilename, std::ios::app);
+            if (!appendFile.is_open()) {
+                std::cerr << "Failed to reopen file: " << context.currentFilename << std::endl;
+                return;
+            }
+
+            for (const auto& book : context.postSortNewBooks)
+                book.addBookToFile(context.currentFilename);
+
+            appendFile.close();
+
+            context.books.insert(context.books.end(), context.postSortNewBooks.begin(), context.postSortNewBooks.end());
+            context.postSortNewBooks.clear();
+        }
+
         context.newBooks.clear();
+        context.isSorted = false;
         context.hasChanges = false;
 
-        std::cout << "Successfully saved new books to " << context.currentFilename << std::endl;
+        std::cout << "Successfully saved to " << context.currentFilename << std::endl;
     }
 };
 
@@ -241,6 +262,71 @@ public:
     }
 };
 
+class BooksSortCommand : public ICommand {
+    
+    std::string option;
+    std::string order;
+
+    template<typename T>
+    void mergeSort(std::vector<Book>& vec, std::function<T(const Book&)> key, bool descending) {
+        if (vec.size() <= 1) return;
+        
+        size_t mid = vec.size() / 2;
+        std::vector<Book> left(vec.begin(), vec.begin() + mid);
+        std::vector<Book> right(vec.begin() + mid, vec.end());
+
+        mergeSort<T>(left, key, descending);
+        mergeSort<T>(right, key, descending);
+
+        size_t i = 0, j = 0, k = 0;
+        while (i < left.size() && j < right.size()) {
+            if ((key(left[i]) < key(right[j])) != descending)
+                vec[k++] = left[i++];
+            else
+                vec[k++] = right[j++];
+        }
+        while (i < left.size()) vec[k++] = left[i++];
+        while (j < right.size()) vec[k++] = right[j++];
+    }
+
+public:
+    BooksSortCommand(std::istream& is) {
+        is >> option >> order;
+        if (order != "desc") order = "asc";
+    }
+
+    void execute(AppContext& context) override {
+        if (!context.fileIsOpen || !context.isLoggedIn) {
+            std::cout << "You need to be logged in and have a file open.\n";
+            return;
+        }
+
+        context.books.insert(context.books.end(), context.newBooks.begin(), context.newBooks.end());
+        context.newBooks.clear();
+
+        bool descending = (order == "desc");
+        if (option == "title")
+            mergeSort<std::string>(context.books, [](const Book& b) { return b.getTitle(); }, descending);
+        else if (option == "author")
+            mergeSort<std::string>(context.books, [](const Book& b) { return b.getAuthor(); }, descending);
+        else if (option == "year")
+            mergeSort<int>(context.books, [](const Book& b) { return b.getYear(); }, descending);
+        else if (option == "rating")
+            mergeSort<double>(context.books, [](const Book& b) { return b.getRating(); }, descending);
+        else {
+            std::cout << "Unknown sort option: " << option << "\n";
+            return;
+        }
+
+        context.isSorted = true;
+
+        std::cout << "Books sorted by " << option << " (" << order << ")\n";
+        for (const auto& b : context.books) b.printByIsbn();
+
+        std::cout << "Use 'save' to write changes to file.\n";
+    }
+};
+
 class BooksAddCommand : public ICommand {
 public:
     BooksAddCommand(std::istream&) {}
@@ -292,8 +378,12 @@ public:
             }
         }
 
-        context.books.push_back(book);
-        context.newBooks.push_back(book);
+        if (context.isSorted) {
+            context.postSortNewBooks.push_back(book);
+        } else {
+            context.newBooks.push_back(book);
+        }
+
         context.hasChanges = true;
 
         std::cout << "Book added to memory. Use 'save' to write changes to file.\n";

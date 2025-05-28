@@ -19,6 +19,7 @@ int main() {
     factory.registerCommand<BooksAllCommand>("books all");
     factory.registerCommand<BooksInfoCommand>("books info");
     factory.registerCommand<BooksFindCommand>("books find");
+    factory.registerCommand<BooksSortCommand>("books sort");
     factory.registerCommand<BooksAddCommand>("books add");
     factory.registerCommand<UserAddCommand>("users add");
     factory.registerCommand<UserRemoveCommand>("users remove");
