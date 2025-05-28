@@ -1,0 +1,40 @@
+#pragma once
+#include "interfaces/ICommand.h"
+#include <map>
+#include <functional>
+#include <string>
+#include <sstream>
+
+class CommandFactory {
+    std::map<std::string, std::function<ICommand*(std::istream&)>> registry;
+
+public:
+    template <typename T>
+    void registerCommand(const std::string& name) {
+        registry[name] = [](std::istream& is) -> ICommand* {
+            return new T(is);
+        };
+    }
+
+    ICommand* fabricate(std::istream& is) {
+        std::string line;
+        std::getline(is, line);
+        std::istringstream fullLine(line);
+
+        std::string token, built;
+        std::streampos startOfArgs;
+        while (fullLine >> token) {
+            if (!built.empty()) built += " ";
+            built += token;
+
+            auto it = registry.find(built);
+            if (it != registry.end()) {
+                startOfArgs = fullLine.tellg();
+                std::string rest = (startOfArgs != -1 ? line.substr(static_cast<size_t>(startOfArgs)) : "");
+                std::istringstream restStream(rest);
+                return it->second(restStream);
+            }
+        }
+        return nullptr;
+    }
+};
