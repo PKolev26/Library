@@ -7,7 +7,7 @@
 #include <vector>
 
 
-const std::string USER_FILE = "users.txt";
+const std::string USER_FILE = "data/users.txt";
 
 class User {
 

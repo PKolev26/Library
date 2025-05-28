@@ -77,5 +77,32 @@ class Book {
         }
     }
 
+    void addBookToFile(const std::string& filename) const {
+        std::ifstream checkFile(filename, std::ios::ate);
+        bool isEmpty = (checkFile.tellg() == 0);
+        checkFile.close();
+
+        std::ofstream file(filename, std::ios::app);
+        if (!file.is_open()) {
+            std::cerr << "Error opening file: " << filename << std::endl;
+            return;
+        }
+
+        if (!isEmpty) {
+            file << "\n";
+        }
+
+        file << author << ";" << title << ";" << genre << ";" << description << ";" << year << ";";
+
+        for (size_t i = 0; i < keywords.size(); ++i) {
+            file << keywords[i];
+            if (i != keywords.size() - 1)
+                file << ",";
+        }
+
+        file << ";" << rating << ";" << isbn;
+
+        file.close();
+    }
 
 };
