@@ -5,6 +5,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 
 class Book {
 
@@ -17,6 +18,13 @@ class Book {
     std::vector<std::string> keywords;
     double rating;
     std::string isbn;
+
+    std::string toLower(const std::string& str) const {
+        std::string lowerStr = str;
+        std::transform(lowerStr.begin(), lowerStr.end(), lowerStr.begin(),
+                   [](unsigned char c) { return std::tolower(c); });
+        return lowerStr;
+    }
 
     public:
 
@@ -63,13 +71,15 @@ class Book {
     }
 
     void booksFind(const std::string& option, const std::string& optionString) const {
-        if (option == "title" && title.find(optionString) != std::string::npos) {
+        std::string optionLower = toLower(optionString);
+
+        if (option == "title" && toLower(title).find(optionLower) != std::string::npos) {
             print();
-        } else if (option == "author" && author.find(optionString) != std::string::npos) {
+        } else if (option == "author" && toLower(author).find(optionLower) != std::string::npos) {
             print();
         } else if (option == "tag") {
             for (const auto& keyword : keywords) {
-                if (keyword.find(optionString) != std::string::npos) {
+                if (toLower(keyword).find(optionLower) != std::string::npos) {
                     print();
                     break;
                 }
