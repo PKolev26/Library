@@ -14,6 +14,8 @@ int main() {
     factory.registerCommand<SaveAsCommand>("saveas");
     factory.registerCommand<CloseCommand>("close");
     factory.registerCommand<HelpCommand>("help");
+    factory.registerCommand<BooksHelpCommand>("books help");
+    factory.registerCommand<UsersHelpCommand>("users help");
     factory.registerCommand<ExitCommand>("exit");
     factory.registerCommand<LoginCommand>("login");
     factory.registerCommand<LogoutCommand>("logout");

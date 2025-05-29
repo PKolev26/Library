@@ -174,8 +174,37 @@ public:
                   << "open <file>\topens <file>\n"
                   << "close\t\tcloses currently opened file\n"
                   << "save\t\tsaves the currently open file\n"
+                  << "saveas <file>\tsaves the currently open file as <file>\n"
+                  << "books help\tprints information about books commands\n"
+                  << "users help\tprints information about users commands\n"
                   << "help\t\tprints this information\n"
                   << "exit\t\texits the program\n";
+    }
+};
+
+class BooksHelpCommand : public ICommand {
+public:
+    BooksHelpCommand(std::istream&) {}
+    void execute(AppContext& context) override {
+        std::cout << "Books commands:\n"
+                  << "books all\tprints all books\n"
+                  << "books info <isbn>\tprints information about a book with the given ISBN\n"
+                  << "books find <option> <value>\tfinds books by <option> (title, author, tag) and <value>\n"
+                  << "books sort <option> <order>\tsorts books by <option> (title, author, year, rating) in <order> (asc, desc)\n"
+                  << "books add\tadds a new book (admin only)\n"
+                  << "books remove <isbn>\tremoves a book with the given ISBN (admin only)\n";
+    }
+};
+
+class UsersHelpCommand : public ICommand {
+public:
+    UsersHelpCommand(std::istream&) {}
+    void execute(AppContext& context) override {
+        std::cout << "Users commands:\n"
+                  << "login\t\tlogs in a user\n"
+                  << "logout\t\tlogs out the current user\n"
+                  << "users add <username> <password>\tadds a new user (admin only)\n"
+                  << "users remove <username>\tremoves a user with the given username (admin only)\n";
     }
 };
 
