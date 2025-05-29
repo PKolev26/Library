@@ -106,6 +106,40 @@ public:
     }
 };
 
+class SaveAsCommand : public ICommand {
+    std::string filename;
+public:
+    SaveAsCommand(std::istream& is) {
+        is >> filename;
+    }
+    void execute(AppContext& context) override {
+        if (!context.fileIsOpen) {
+            std::cout << "No file is currently open." << std::endl;
+            return;
+        }
+
+        std::ofstream file(filename, std::ios::trunc);
+        if (!file.is_open()) {
+            std::cerr << "Failed to open file: " << filename << std::endl;
+            return;
+        }
+
+        for (const auto& book : context.books)
+            book.addBookToFile(filename);
+
+        for (const auto& book : context.postSortNewBooks) {
+            book.addBookToFile(filename);
+            context.books.push_back(book);
+        }
+        context.postSortNewBooks.clear();
+
+        context.newBooks.clear();
+        context.isSorted = false;
+        context.hasChanges = false;
+
+        std::cout << "Successfully saved to " << filename << std::endl;
+    }
+};
 
 
 class CloseCommand : public ICommand {

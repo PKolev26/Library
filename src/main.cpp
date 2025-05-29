@@ -11,6 +11,7 @@ int main() {
 
     factory.registerCommand<OpenCommand>("open");
     factory.registerCommand<SaveCommand>("save");
+    factory.registerCommand<SaveAsCommand>("saveas");
     factory.registerCommand<CloseCommand>("close");
     factory.registerCommand<HelpCommand>("help");
     factory.registerCommand<ExitCommand>("exit");
