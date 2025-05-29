@@ -8,6 +8,7 @@
 #include <vector>
 #include <sstream>
 #include <limits>
+#include <conio.h>
 
 class OpenCommand : public ICommand {
     std::string filename;
@@ -228,6 +229,24 @@ public:
 };
 
 class LoginCommand : public ICommand {
+    std::string getPassword() {
+        std::string password;
+        char ch;
+
+        while ((ch = _getch()) != '\r') {
+            if (ch == '\b') {
+                if (!password.empty()) {
+                    password.pop_back();
+                    std::cout << "\b \b";
+                }
+            } else {
+                password += ch;
+                std::cout << '*';
+            }
+        }
+        std::cout << std::endl;
+        return password;
+    }
 public:
     LoginCommand(std::istream&) {}
     void execute(AppContext& context) override {
@@ -239,7 +258,7 @@ public:
         std::cout << "Enter username: "; 
         std::getline(std::cin, username);
         std::cout << "Enter password: ";
-        std::getline(std::cin, password);
+        password = getPassword();
 
         std::vector<User> users;
         User temp;
