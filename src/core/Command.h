@@ -78,7 +78,7 @@ public:
             return;
         }
 
-        if (!context.isSorted && context.newBooks.empty() && context.postSortNewBooks.empty()) {
+        if (!context.hasChanges) {
             std::cout << "No changes to save." << std::endl;
             return;
         }
@@ -89,30 +89,14 @@ public:
             return;
         }
 
-        if (context.isSorted) {
-            for (const auto& book : context.books)
-                book.addBookToFile(context.currentFilename);
-        } else {
-            context.books.insert(context.books.end(), context.newBooks.begin(), context.newBooks.end());
-            for (const auto& book : context.books)
-                book.addBookToFile(context.currentFilename);
+        for (const auto& book : context.books)
+            book.addBookToFile(context.currentFilename);
+
+        for (const auto& book : context.postSortNewBooks) {
+            book.addBookToFile(context.currentFilename);
+            context.books.push_back(book);
         }
-
-        if (!context.postSortNewBooks.empty()) {
-            std::ofstream appendFile(context.currentFilename, std::ios::app);
-            if (!appendFile.is_open()) {
-                std::cerr << "Failed to reopen file: " << context.currentFilename << std::endl;
-                return;
-            }
-
-            for (const auto& book : context.postSortNewBooks)
-                book.addBookToFile(context.currentFilename);
-
-            appendFile.close();
-
-            context.books.insert(context.books.end(), context.postSortNewBooks.begin(), context.postSortNewBooks.end());
-            context.postSortNewBooks.clear();
-        }
+        context.postSortNewBooks.clear();
 
         context.newBooks.clear();
         context.isSorted = false;
@@ -401,6 +385,33 @@ public:
     }
 };
 
+class BooksRemoveCommand : public ICommand {
+    std::string isbn;
+public:
+    BooksRemoveCommand(std::istream& is) {
+        is >> isbn;
+    }
+
+    void execute(AppContext& context) override {
+        if (!context.fileIsOpen || !context.isLoggedIn || !context.currentUser.getIsAdmin()) {
+            std::cout << "You do not have permission to remove books.\n";
+            return;
+        }
+
+        auto& books = context.books;
+        for (size_t i = 0; i < books.size(); ++i) {
+            if (books[i].getIsbn() == isbn) {
+                books[i] = books.back();
+                books.pop_back();
+                context.hasChanges = true;
+                context.isSorted = false;
+                std::cout << "Book removed. Use 'save' to write changes to file.\n";
+                return;
+            }
+        }
+        std::cout << "No book found with ISBN: " << isbn << "\n";
+    }
+};
 
 class UserAddCommand : public ICommand {
     std::string username, password;

@@ -104,5 +104,4 @@ class Book {
 
         file.close();
     }
-
 };
