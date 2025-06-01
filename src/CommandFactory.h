@@ -5,9 +5,9 @@
 #include <string>
 #include <sstream>
 
+// CommandFactory is responsible for creating command objects based on input strings.
 class CommandFactory {
     std::map<std::string, std::function<ICommand*(std::istream&)>> registry;
-
 public:
     template <typename T>
     void registerCommand(const std::string& name) {

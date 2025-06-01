@@ -8,8 +8,10 @@
 #include <vector>
 #include <sstream>
 #include <limits>
+#include <functional>
 #include <conio.h>
 
+// OpenCommand opens a file, reads its contents, and populates the AppContext with Book objects.
 class OpenCommand : public ICommand {
     std::string filename;
 public:
@@ -47,9 +49,9 @@ public:
 
                     std::vector<std::string> keywordsVec;
                     std::istringstream kss(keywords);
-                    std::string kw;
-                    while (std::getline(kss, kw, ',')) {
-                        if (!kw.empty()) keywordsVec.push_back(kw);
+                    std::string keyword;
+                    while (std::getline(kss, keyword, ',')) {
+                        if (!keyword.empty()) keywordsVec.push_back(keyword);
                     }
 
                     book.setKeywords(keywordsVec);
@@ -69,6 +71,7 @@ public:
     }
 };
 
+// SaveCommand saves the current state of the AppContext to the currently open file.
 class SaveCommand : public ICommand {
 public:
     SaveCommand(std::istream&) {}
@@ -93,10 +96,16 @@ public:
         for (const auto& book : context.books)
             book.addBookToFile(context.currentFilename);
 
+        for (const auto& book : context.newBooks) {
+            book.addBookToFile(context.currentFilename);
+            context.books.push_back(book);
+        }
+
         for (const auto& book : context.postSortNewBooks) {
             book.addBookToFile(context.currentFilename);
             context.books.push_back(book);
         }
+        
         context.postSortNewBooks.clear();
 
         context.newBooks.clear();
@@ -107,6 +116,7 @@ public:
     }
 };
 
+// SaveAsCommand saves the current state of the AppContext to a new file specified by the user.
 class SaveAsCommand : public ICommand {
     std::string filename;
 public:
@@ -128,10 +138,16 @@ public:
         for (const auto& book : context.books)
             book.addBookToFile(filename);
 
+        for (const auto& book : context.newBooks) {
+            book.addBookToFile(filename);
+            context.books.push_back(book);
+        }
+
         for (const auto& book : context.postSortNewBooks) {
             book.addBookToFile(filename);
             context.books.push_back(book);
         }
+        
         context.postSortNewBooks.clear();
 
         context.newBooks.clear();
@@ -142,7 +158,7 @@ public:
     }
 };
 
-
+// CloseCommand closes the currently open file, prompting the user if there are unsaved changes.
 class CloseCommand : public ICommand {
 public:
     CloseCommand(std::istream&) {}
@@ -167,6 +183,7 @@ public:
     }
 };
 
+// HelpCommand prints a list of available commands and their descriptions.
 class HelpCommand : public ICommand {
 public:
     HelpCommand(std::istream&) {}
@@ -183,6 +200,7 @@ public:
     }
 };
 
+// BooksHelpCommand prints a list of available commands related to books and their descriptions.
 class BooksHelpCommand : public ICommand {
 public:
     BooksHelpCommand(std::istream&) {}
@@ -197,6 +215,7 @@ public:
     }
 };
 
+// UsersHelpCommand prints a list of available commands related to users and their descriptions.
 class UsersHelpCommand : public ICommand {
 public:
     UsersHelpCommand(std::istream&) {}
@@ -209,6 +228,7 @@ public:
     }
 };
 
+// ExitCommand exits the program, prompting the user if there are unsaved changes.
 class ExitCommand : public ICommand {
 public:
     ExitCommand(std::istream&) {}
@@ -220,15 +240,18 @@ public:
             if (choice != "yes") {
                 std::cout << "Exit canceled.\n";
                 return;
+            }
         }
+        std::cout << "Exiting the program..." << std::endl;
+        std::exit(0);
     }
-    std::cout << "Exiting the program..." << std::endl;
-    std::exit(0);
-}
-
 };
 
+// LoginCommand logs in a user by checking the provided username and password against the stored users.
 class LoginCommand : public ICommand {
+
+    // Function to get password input and show * instead of actual characters
+    // Stackoverflow solution for password input
     std::string getPassword() {
         std::string password;
         char ch;
@@ -247,6 +270,8 @@ class LoginCommand : public ICommand {
         std::cout << std::endl;
         return password;
     }
+    // End of Stackoverflow solution for password input
+
 public:
     LoginCommand(std::istream&) {}
     void execute(AppContext& context) override {
@@ -260,13 +285,12 @@ public:
         std::cout << "Enter password: ";
         password = getPassword();
 
-        std::vector<User> users;
         User temp;
-        temp.readFromFile(USER_FILE, users);
+        temp.readFromFile(USER_FILE, context.users);
 
-        for (const auto& u : users) {
-            if (u.getUsername() == username && u.getPassword() == password) {
-                context.currentUser = u;
+        for (const auto& user : context.users) {
+            if (user.getUsername() == username && user.getPassword() == password) {
+                context.currentUser = user;
                 context.isLoggedIn = true;
                 std::cout << "Welcome, " << username << "!\n";
                 return;
@@ -276,6 +300,7 @@ public:
     }
 };
 
+// LogoutCommand logs out the current user, if logged in.
 class LogoutCommand : public ICommand {
 public:
     LogoutCommand(std::istream&) {}
@@ -285,10 +310,12 @@ public:
             return;
         }
         context.isLoggedIn = false;
+        context.currentUser = User();
         std::cout << "Successfully logged out.\n";
     }
 };
 
+// BooksAllCommand prints all books in the current context, if a file is open and the user is logged in.
 class BooksAllCommand : public ICommand {
 public:
     BooksAllCommand(std::istream&) {}
@@ -303,6 +330,7 @@ public:
     }
 };
 
+// BooksInfoCommand prints detailed information about a book with the given ISBN, if a file is open and the user is logged in.
 class BooksInfoCommand : public ICommand {
     std::string isbn;
 public:
@@ -321,6 +349,7 @@ public:
     }
 };
 
+// BooksFindCommand finds books based on a specified option and value, if a file is open and the user is logged in.
 class BooksFindCommand : public ICommand {
     std::string option, value;
 public:
@@ -339,18 +368,19 @@ public:
     }
 };
 
+// BooksSortCommand sorts the books in the current context based on a specified option and order, if a file is open and the user is logged in.
 class BooksSortCommand : public ICommand {
     
     std::string option;
     std::string order;
 
     template<typename T>
-    void mergeSort(std::vector<Book>& vec, std::function<T(const Book&)> key, bool descending) {
-        if (vec.size() <= 1) return;
-        
-        size_t mid = vec.size() / 2;
-        std::vector<Book> left(vec.begin(), vec.begin() + mid);
-        std::vector<Book> right(vec.begin() + mid, vec.end());
+    void mergeSort(std::vector<Book>& books, std::function<T(const Book&)> key, bool descending) {
+        if (books.size() <= 1) return;
+
+        size_t mid = books.size() / 2;
+        std::vector<Book> left(books.begin(), books.begin() + mid);
+        std::vector<Book> right(books.begin() + mid, books.end());
 
         mergeSort<T>(left, key, descending);
         mergeSort<T>(right, key, descending);
@@ -358,12 +388,12 @@ class BooksSortCommand : public ICommand {
         size_t i = 0, j = 0, k = 0;
         while (i < left.size() && j < right.size()) {
             if ((key(left[i]) < key(right[j])) != descending)
-                vec[k++] = left[i++];
+                books[k++] = left[i++];
             else
-                vec[k++] = right[j++];
+                books[k++] = right[j++];
         }
-        while (i < left.size()) vec[k++] = left[i++];
-        while (j < right.size()) vec[k++] = right[j++];
+        while (i < left.size()) books[k++] = left[i++];
+        while (j < right.size()) books[k++] = right[j++];
     }
 
 public:
@@ -396,6 +426,7 @@ public:
         }
 
         context.isSorted = true;
+        context.hasChanges = true;
 
         std::cout << "Books sorted by " << option << " (" << order << ")\n";
         for (const auto& b : context.books) b.printByIsbn();
@@ -404,12 +435,17 @@ public:
     }
 };
 
+// BooksAddCommand adds a new book to the current context, if a file is open and the user is logged in as an admin.
 class BooksAddCommand : public ICommand {
 public:
     BooksAddCommand(std::istream&) {}
 
     void execute(AppContext& context) override {
-        if (!context.fileIsOpen || !context.isLoggedIn || !context.currentUser.getIsAdmin()) {
+        if (!context.fileIsOpen) {
+            std::cout << "No file is currently open.\n";
+            return;
+        }
+        if (!context.isLoggedIn || !context.currentUser.getIsAdmin()) {
             std::cout << "You do not have permission to add books.\n";
             return;
         }
@@ -428,19 +464,23 @@ public:
         while (!(std::cin >> year)) {
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            std::cout << "Invalid input. Enter a number for year: ";
+            std::cout << "Invalid input. Enter a valid year: ";
         }
         std::cin.ignore();
 
-        std::cout << "Enter keywords (comma-separated): "; std::getline(std::cin, keywordsStr);
+        std::cout << "Enter keywords (comma-separated): ";
+        std::getline(std::cin, keywordsStr);
         std::istringstream kwStream(keywordsStr);
-        std::string kw; while (std::getline(kwStream, kw, ',')) if (!kw.empty()) keywords.push_back(kw);
+        std::string kw;
+        while (std::getline(kwStream, kw, ',')) {
+            if (!kw.empty()) keywords.push_back(kw);
+        }
 
         std::cout << "Enter rating: ";
         while (!(std::cin >> rating)) {
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            std::cout << "Invalid input. Enter a number for rating: ";
+            std::cout << "Invalid input. Enter a valid rating: ";
         }
         std::cin.ignore();
 
@@ -448,8 +488,8 @@ public:
 
         Book book(author, title, genre, description, year, keywords, rating, isbn);
 
-        for (const auto& b : context.books) {
-            if (b.getIsbn() == isbn) {
+        for (const auto& book : context.books) {
+            if (book.getIsbn() == isbn) {
                 std::cout << "Book with ISBN already exists.\n";
                 return;
             }
@@ -467,6 +507,7 @@ public:
     }
 };
 
+// BooksRemoveCommand removes a book with the specified ISBN from the current context, if a file is open and the user is logged in as an admin.
 class BooksRemoveCommand : public ICommand {
     std::string isbn;
 public:
@@ -495,6 +536,7 @@ public:
     }
 };
 
+// UserAddCommand adds a new user to the system, if the current user is logged in as an admin.
 class UserAddCommand : public ICommand {
     std::string username, password;
 public:
@@ -506,24 +548,70 @@ public:
             std::cout << "You do not have permission to add users.\n";
             return;
         }
+
+        for(auto& user : context.users)
+        {
+            if (user.getUsername() == username) {
+                std::cout << "User with this username already exists.\n";
+                return;
+            }
+        }
+        if(username.empty() || password.empty()) {
+            std::cout << "Username and password cannot be empty.\n";
+            return;
+        }
+
         User newUser(username, password, false);
         newUser.addUserToFile(newUser);
+        context.users.push_back(newUser);
         std::cout << "User " << username << " added successfully.\n";
     }
 };
 
+// UserRemoveCommand removes a user from the system by username, if the current user is logged in as an admin.
 class UserRemoveCommand : public ICommand {
     std::string username;
 public:
     UserRemoveCommand(std::istream& is) {
         is >> username;
     }
+
     void execute(AppContext& context) override {
         if (!context.isLoggedIn || !context.currentUser.getIsAdmin()) {
             std::cout << "You do not have permission to remove users.\n";
             return;
         }
-        context.currentUser.removeUserFromFile(username);
-        std::cout << "User " << username << " removed successfully.\n";
+
+        auto& users = context.users;
+        for (size_t i = 0; i < users.size(); ++i) {
+            if (users[i].getUsername() == username) {
+                if (users[i].getUsername() == context.currentUser.getUsername()) {
+                    std::cout << "You cannot remove yourself while logged in.\n";
+                    return;
+                }
+
+                users[i] = users.back();
+                users.pop_back();
+
+                std::ofstream file(USER_FILE, std::ios::trunc);
+                if (!file.is_open()) {
+                    std::cerr << "Error opening user file for writing.\n";
+                    return;
+                }
+
+                for (size_t j = 0; j < users.size(); ++j) {
+                    if (j != 0) file << '\n';
+                    file << users[j].getUsername() << ';'
+                         << users[j].getPassword() << ';'
+                         << (users[j].getIsAdmin() ? "true" : "false");
+                }
+
+                file.close();
+                std::cout << "User removed successfully.\n";
+                return;
+            }
+        }
+
+        std::cout << "No user found with username: " << username << "\n";
     }
 };

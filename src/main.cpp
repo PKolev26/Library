@@ -6,9 +6,11 @@
 
 int main() {
     
+    // Initialize the application context and command factory
     AppContext context;
     CommandFactory factory;
 
+    // Register commands with the factory
     factory.registerCommand<OpenCommand>("open");
     factory.registerCommand<SaveCommand>("save");
     factory.registerCommand<SaveAsCommand>("saveas");
@@ -28,6 +30,7 @@ int main() {
     factory.registerCommand<UserAddCommand>("users add");
     factory.registerCommand<UserRemoveCommand>("users remove");
 
+    // Main command loop
     std::string line;
     while (true) {
         std::cout << "> ";
