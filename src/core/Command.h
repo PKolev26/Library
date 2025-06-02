@@ -562,8 +562,9 @@ public:
         }
 
         User newUser(username, password, false);
-        newUser.addUserToFile(newUser);
         context.users.push_back(newUser);
+        User::saveAllUsersToFile(context.users);
+
         std::cout << "User " << username << " added successfully.\n";
     }
 };

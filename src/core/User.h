@@ -38,6 +38,7 @@ class User {
 
     // Function to read users from a file
     void readFromFile(const std::string& filename, std::vector<User>& users) {
+        users.clear();
         std::ifstream file(filename);
         if (!file.is_open()) {
             std::cerr << "Error opening file: " << filename << std::endl;
@@ -57,16 +58,23 @@ class User {
         file.close();
     }
 
-    // Function to add a user to the file
-    void addUserToFile(const User& user) {
-        std::ofstream file(USER_FILE, std::ios::app);
+    // Function to save all users to a file
+    static void saveAllUsersToFile(const std::vector<User>& users) {
+        std::ofstream file(USER_FILE, std::ios::trunc);
         if (!file.is_open()) {
-            std::cerr << "Error opening file: " << USER_FILE << std::endl;
+            std::cerr << "Error opening file for writing: " << USER_FILE << std::endl;
             return;
         }
-        file << "\n" << user.getUsername() << ";"
-             << user.getPassword() << ";"
-             << (user.getIsAdmin() ? "true" : "false");
+
+        for (size_t i = 0; i < users.size(); ++i) {
+            const User& user = users[i];
+            file << user.getUsername() << ";"
+                << user.getPassword() << ";"
+                << (user.getIsAdmin() ? "true" : "false");
+            if (i < users.size() - 1)
+                file << '\n';
+        }
+
         file.close();
     }
 };

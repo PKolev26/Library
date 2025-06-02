@@ -136,7 +136,7 @@ TEST_CASE("LoginCommand logs in a user") {
     std::string password = "i<3c++";
 
     User user(username, password, false);
-    user.addUserToFile(user);
+    User::saveAllUsersToFile({user});
     std::istringstream input(username + " " + password);
     LoginCommand cmd(input);
     AppContext context;
