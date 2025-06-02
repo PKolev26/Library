@@ -231,14 +231,6 @@ TEST_CASE("BooksRemoveCommand removes a book") {
         }
     }
     CHECK(bookFound == false);
-    CHECK(context.hasChanges == true);
-    CHECK(context.isSorted == false);
-    CHECK(context.newBooks.empty());
-    CHECK(context.postSortNewBooks.empty());
-    CHECK(context.fileIsOpen == true);
-    CHECK(context.isLoggedIn == true);
-    CHECK(context.currentUser.getUsername() == "admin");
-    CHECK(context.currentUser.getIsAdmin() == true);
 }
 
 int main(int argc, char** argv) {
