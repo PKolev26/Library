@@ -21,18 +21,18 @@ public:
         std::getline(is, line);
         std::istringstream fullLine(line);
 
-        std::string token, built;
+        std::string argument, built;
         std::streampos startOfArgs;
-        while (fullLine >> token) {
+        while (fullLine >> argument) {
             if (!built.empty()) built += " ";
-            built += token;
+            built += argument;
 
-            auto it = registry.find(built);
-            if (it != registry.end()) {
+            auto command = registry.find(built);
+            if (command != registry.end()) {
                 startOfArgs = fullLine.tellg();
                 std::string rest = (startOfArgs != -1 ? line.substr(static_cast<size_t>(startOfArgs)) : "");
                 std::istringstream restStream(rest);
-                return it->second(restStream);
+                return command->second(restStream);
             }
         }
         return nullptr;

@@ -450,7 +450,7 @@ public:
             return;
         }
 
-        std::string author, title, genre, description, keywordsStr, isbn;
+        std::string author, title, genre, description, keywordsString, isbn;
         int year;
         double rating;
         std::vector<std::string> keywords;
@@ -469,11 +469,11 @@ public:
         std::cin.ignore();
 
         std::cout << "Enter keywords (comma-separated): ";
-        std::getline(std::cin, keywordsStr);
-        std::istringstream kwStream(keywordsStr);
-        std::string kw;
-        while (std::getline(kwStream, kw, ',')) {
-            if (!kw.empty()) keywords.push_back(kw);
+        std::getline(std::cin, keywordsString);
+        std::istringstream keywordsStream(keywordsString);
+        std::string keyword;
+        while (std::getline(keywordsStream, keyword, ',')) {
+            if (!keyword.empty()) keywords.push_back(keyword);
         }
 
         std::cout << "Enter rating: ";
@@ -516,7 +516,12 @@ public:
     }
 
     void execute(AppContext& context) override {
-        if (!context.fileIsOpen || !context.isLoggedIn || !context.currentUser.getIsAdmin()) {
+        if (!context.fileIsOpen || !context.isLoggedIn) {
+            std::cout << "You need to be logged in and have a file open to remove books.\n";
+            return;
+        }
+
+        if (!context.currentUser.getIsAdmin()) {
             std::cout << "You do not have permission to remove books.\n";
             return;
         }
@@ -600,12 +605,7 @@ public:
                     return;
                 }
 
-                for (size_t j = 0; j < users.size(); ++j) {
-                    if (j != 0) file << '\n';
-                    file << users[j].getUsername() << ';'
-                         << users[j].getPassword() << ';'
-                         << (users[j].getIsAdmin() ? "true" : "false");
-                }
+                User::saveAllUsersToFile(users);
 
                 file.close();
                 std::cout << "User removed successfully.\n";
