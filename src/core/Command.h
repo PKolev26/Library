@@ -19,12 +19,18 @@ public:
         is >> filename;
     }
     void execute(AppContext& context) override {
+
+        if (context.fileIsOpen) {
+            std::cout << "A file is already open. Please close it before opening a new one.\n";
+            return;
+        }
+
         std::ifstream file(filename);
         if (!file.is_open()) {
             std::ofstream newFile(filename);
             if (!newFile.is_open()) {
                 std::cerr << "Error creating file: " << filename << std::endl;
-                std::exit(1);
+                return;
             }
             newFile.close();
             context.books.clear();
